@@ -1,4 +1,5 @@
 import datetime
+import csv
 
 
 def main_menu():
@@ -27,16 +28,15 @@ def main_menu():
 
 
 def new_entry(menu_options):
+    title = input("Title of task: ")
     while True:
         try:
             task_date = input("Enter task date. Please use DD-MM-YYYY: ")
             strp_task_date = datetime.datetime.strptime(task_date, "%d-%m-%Y")
+            fmt_task_date = strp_task_date.strftime("%d-%m-%Y")
         except ValueError:
             print("You must use the following date format DD-MM-YYYY")
         else:
-            strf_task_date = strp_task_date.strftime("%B %d %Y")
-            print(strf_task_date)
-            title = input("Title of task: ")
             while True:
                 try:
                     time_spent = int(input("Time spent on task. (Rounded Minutes): "))
@@ -44,14 +44,34 @@ def new_entry(menu_options):
                     print("You must use rounded minutes. example: 12 ")
                 else:
                     break
-            optional_notes = input("Optional notes. (You may leave this blank): ")
-            print("Your entry has been recorded.")
-            print(menu_options)
             break
+    optional_notes = input("Optional notes. (You may leave this blank): ")
+    write_to_file(title, fmt_task_date, time_spent, optional_notes)
+    print("Your entry has been recorded.")
+    print(menu_options)
+
+
+def write_to_file(title, fmt_task_date, time_spent, optional_notes):
+    with open("work_log.csv", "a", newline="") as csvfile:
+        fieldnames = ["Title", "Task Date", "Time", "Notes"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writerow({
+                        "Title": title,
+                        "Task Date": fmt_task_date,
+                        "Time": time_spent,
+                        "Notes": optional_notes
+                        })
 
 
 def search_entries():
     pass
 
 
-main_menu()
+if __name__ == "__main__":
+    with open("work_log.csv", "w", newline="") as csvfile:
+        fieldnames = ["Title", "Task Date", "Time", "Notes"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        writer.writeheader()
+    main_menu()
