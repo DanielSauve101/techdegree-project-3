@@ -71,7 +71,6 @@ def search_menu(menu_options):
     list_by_date = []
     list_by_time = []
     list_by_notes = []
-    list_work_log = []
     with open("work_log.csv", newline="") as csvfile:
         reader = csv.DictReader(csvfile)
         rows = list(reader)
@@ -80,11 +79,6 @@ def search_menu(menu_options):
             list_by_date.append(word["Task Date"])
             list_by_time.append(word["Time"])
             list_by_notes.append(word["Notes"])
-
-    list_work_log.append(list_by_title)
-    list_work_log.append(list_by_date)
-    list_work_log.append(list_by_time)
-    list_work_log.append(list_by_notes)
 
     print("""
     Search Menu
@@ -99,13 +93,13 @@ def search_menu(menu_options):
         try:
             search_selection = input("> ").lower()
             if search_selection == "a":
-                search_by_date(list_work_log)
+                search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "b":
-                search_by_time_spent(list_work_log)
+                search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "c":
-                search_by_exact_title(list_work_log)
+                search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "d":
-                search_by_regex(list_work_log)
+                search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "e":
                 print(menu_options)
                 break
@@ -123,9 +117,15 @@ def search_by_time_spent():
     pass
 
 
-def search_by_exact_title(list_work_log):
-    pass
-    # search_title = input("Which title are you looking for: ")
+def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes):
+    search_title = input("Which title are you looking for: ")
+    index = list_by_title.index(search_title)
+    print("""
+    Title: {}
+    Date: {}
+    Time Spent: {}
+    Optional Notes {}
+    """.format(list_by_title[index], list_by_date[index], list_by_time[index], list_by_notes[index]))
 
 
 def search_by_regex():
