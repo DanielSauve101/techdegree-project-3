@@ -40,18 +40,20 @@ def new_entry(menu_options):
             while True:
                 try:
                     time_spent = int(input("Time spent on task. (Rounded Minutes): "))
+                    fmt_time_spent = datetime.timedelta(minutes=time_spent)
                 except ValueError:
                     print("You must use rounded minutes. example: 12 ")
                 else:
+                    print(fmt_time_spent)
                     break
             break
     optional_notes = input("Optional notes. (You may leave this blank): ")
-    write_to_file(title, fmt_task_date, time_spent, optional_notes)
+    write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes)
     print("Your entry has been recorded.")
     print(menu_options)
 
 
-def write_to_file(title, fmt_task_date, time_spent, optional_notes):
+def write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes):
     with open("work_log.csv", "a", newline="") as csvfile:
         fieldnames = ["Title", "Task Date", "Time", "Notes"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -59,7 +61,7 @@ def write_to_file(title, fmt_task_date, time_spent, optional_notes):
         writer.writerow({
                         "Title": title,
                         "Task Date": fmt_task_date,
-                        "Time": time_spent,
+                        "Time": fmt_time_spent,
                         "Notes": optional_notes
                         })
 
