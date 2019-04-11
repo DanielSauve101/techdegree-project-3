@@ -10,15 +10,15 @@ def main_menu():
     b) Search in existing entries
     c) Quit program
     """
-    print(menu_options)
 
     while True:
         try:
+            print(menu_options)
             menu_selection = input("> ").lower()
             if menu_selection == "a":
-                new_entry(menu_options)
+                new_entry()
             elif menu_selection == "b":
-                search_menu(menu_options)
+                search_menu()
             elif menu_selection == "c":
                 break
             elif menu_selection != "a" or menu_selection != "b" or menu_selection != "c":
@@ -27,7 +27,7 @@ def main_menu():
             print("You must select a valid option. (a, b, or c)")
 
 
-def new_entry(menu_options):
+def new_entry():
     title = input("Title of task: ")
     while True:
         try:
@@ -40,20 +40,17 @@ def new_entry(menu_options):
             while True:
                 try:
                     time_spent = int(input("Time spent on task. (Rounded Minutes): "))
-                    fmt_time_spent = datetime.timedelta(minutes=time_spent)
                 except ValueError:
                     print("You must use rounded minutes. example: 12 ")
                 else:
-                    print(fmt_time_spent)
                     break
             break
     optional_notes = input("Optional notes. (You may leave this blank): ")
-    write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes)
+    write_to_file(title, fmt_task_date, time_spent, optional_notes)
     print("Your entry has been recorded.")
-    print(menu_options)
 
 
-def write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes):
+def write_to_file(title, fmt_task_date, time_spent, optional_notes):
     with open("work_log.csv", "a", newline="") as csvfile:
         fieldnames = ["Title", "Task Date", "Time", "Notes"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -61,12 +58,12 @@ def write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes):
         writer.writerow({
                         "Title": title,
                         "Task Date": fmt_task_date,
-                        "Time": fmt_time_spent,
+                        "Time": time_spent,
                         "Notes": optional_notes
                         })
 
 
-def search_menu(menu_options):
+def search_menu():
     list_by_title = []
     list_by_date = []
     list_by_time = []
@@ -76,11 +73,11 @@ def search_menu(menu_options):
         rows = list(reader)
         for word in rows:
             list_by_title.append(word["Title"])
-            list_by_date.append(word["Task Date"])
+            list_by_date.append(datetime.datetime.strptime(word["Task Date"], "%d-%m-%Y"))
             list_by_time.append(word["Time"])
             list_by_notes.append(word["Notes"])
 
-    print("""
+    search_menu = """
     Search Menu
     Please select from the options below?
     a) Search by date
@@ -88,9 +85,11 @@ def search_menu(menu_options):
     c) Search by exact title
     d) Search by regex
     e) Previous menu
-    """)
+    """
+
     while True:
         try:
+            print(search_menu)
             search_selection = input("> ").lower()
             if search_selection == "a":
                 search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes)
@@ -101,7 +100,6 @@ def search_menu(menu_options):
             elif search_selection == "d":
                 search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "e":
-                print(menu_options)
                 break
             elif search_selection != "a" or search_selection != "b" or search_selection != "c" or search_selection != "d" or search_selection != "e":
                 raise ValueError
@@ -119,13 +117,21 @@ def search_by_time_spent():
 
 def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes):
     search_title = input("Which title are you looking for: ")
-    index = list_by_title.index(search_title)
-    print("""
-    Title: {}
-    Date: {}
-    Time Spent: {}
-    Optional Notes {}
-    """.format(list_by_title[index], list_by_date[index], list_by_time[index], list_by_notes[index]))
+    try:
+        index = list_by_title.index(search_title)
+    except ValueError:
+        print("We are sorry but we did not find an exact match in Titles")
+    else:
+        print("""
+        Title: {}
+        Date: {}
+        Time spent in minutes: {}
+        Optional notes: {}
+        """.format(
+            list_by_title[index],
+            list_by_date[index].strftime("%B %d %Y"),
+            list_by_time[index],
+            list_by_notes[index]))
 
 
 def search_by_regex():
