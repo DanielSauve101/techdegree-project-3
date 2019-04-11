@@ -74,7 +74,7 @@ def search_menu():
         for word in rows:
             list_by_title.append(word["Title"])
             list_by_date.append(datetime.datetime.strptime(word["Task Date"], "%d-%m-%Y"))
-            list_by_time.append(word["Time"])
+            list_by_time.append(int(word["Time"]))
             list_by_notes.append(word["Notes"])
 
     search_menu = """
@@ -111,8 +111,27 @@ def search_by_date():
     pass
 
 
-def search_by_time_spent():
-    pass
+def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes):
+    try:
+        search_time = int(input("How many minutes would you like to search by: "))
+    except ValueError:
+        print("You must use rounded minutes. example: 120")
+    else:
+        index_positions = [i for (i, time) in enumerate(list_by_time) if time == search_time]
+        if len(index_positions) == 0:
+            print("We are sorry but we did not find an exact match in Time")
+        else:
+            for match in index_positions:
+                print("""
+                Title: {}
+                Date: {}
+                Time spent in minutes: {}
+                Optional notes: {}
+                """.format(
+                    list_by_title[match],
+                    list_by_date[match].strftime("%B %d %Y"),
+                    list_by_time[match],
+                    list_by_notes[match]))
 
 
 def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes):
