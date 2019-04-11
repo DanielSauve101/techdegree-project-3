@@ -18,7 +18,7 @@ def main_menu():
             if menu_selection == "a":
                 new_entry(menu_options)
             elif menu_selection == "b":
-                search_entries()
+                search_menu(menu_options)
             elif menu_selection == "c":
                 break
             elif menu_selection != "a" or menu_selection != "b" or menu_selection != "c":
@@ -66,7 +66,49 @@ def write_to_file(title, fmt_task_date, fmt_time_spent, optional_notes):
                         })
 
 
-def search_entries():
+def search_menu(menu_options):
+    print("""
+    Search Menu
+    Please select from the options below?
+    a) Search by date
+    b) Search by time spent
+    c) Search by exact title
+    d) Search by regex
+    e) Previous menu
+    """)
+    while True:
+        try:
+            search_selection = input("> ").lower()
+            if search_selection == "a":
+                search_by_date()
+            elif search_selection == "b":
+                search_by_time_spent()
+            elif search_selection == "c":
+                search_by_exact_title()
+            elif search_selection == "d":
+                search_by_regex()
+            elif search_selection == "e":
+                print(menu_options)
+                break
+            elif search_selection != "a" or search_selection != "b" or search_selection != "c" or search_selection != "d" or search_selection != "e":
+                raise ValueError
+        except ValueError:
+            print("You must select a valid option. (a, b, c, d, or e)")
+
+
+def search_by_date():
+    pass
+
+
+def search_by_time_spent():
+    pass
+
+
+def search_by_exact_title():
+    pass
+
+
+def search_by_regex():
     pass
 
 
