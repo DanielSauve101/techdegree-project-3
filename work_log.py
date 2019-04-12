@@ -117,11 +117,11 @@ def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_note
     except ValueError:
         print("You must use rounded minutes. example: 120")
     else:
-        index_positions = [i for (i, time) in enumerate(list_by_time) if time == search_time]
-        if len(index_positions) == 0:
+        index_positions_time = [i for (i, time) in enumerate(list_by_time) if time == search_time]
+        if len(index_positions_time) == 0:
             print("We are sorry but we did not find an exact match in Time")
         else:
-            for match in index_positions:
+            for match in index_positions_time:
                 print("""
                 Title: {}
                 Date: {}
@@ -136,21 +136,21 @@ def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_note
 
 def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes):
     search_title = input("Which title are you looking for: ")
-    try:
-        index = list_by_title.index(search_title)
-    except ValueError:
+    index_positions_title = [i for (i, title) in enumerate(list_by_title) if title == search_title]
+    if len(index_positions_title) == 0:
         print("We are sorry but we did not find an exact match in Titles")
     else:
-        print("""
-        Title: {}
-        Date: {}
-        Time spent in minutes: {}
-        Optional notes: {}
-        """.format(
-            list_by_title[index],
-            list_by_date[index].strftime("%B %d %Y"),
-            list_by_time[index],
-            list_by_notes[index]))
+        for match in index_positions_title:
+            print("""
+            Title: {}
+            Date: {}
+            Time spent in minutes: {}
+            Optional notes: {}
+            """.format(
+                list_by_title[match],
+                list_by_date[match].strftime("%B %d %Y"),
+                list_by_time[match],
+                list_by_notes[match]))
 
 
 def search_by_regex():
