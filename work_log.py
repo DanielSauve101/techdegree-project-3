@@ -1,5 +1,6 @@
 import datetime
 import csv
+import re
 
 
 def main_menu():
@@ -186,8 +187,13 @@ def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_not
                 list_by_notes[match]))
 
 
-def search_by_regex():
-    pass
+def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
+    with open("work_log.csv", "r", newline="") as csvfile:
+        data = csvfile.read()
+
+    re_search = input("What type of pattern are you looking for: ")
+
+    print(re.search(r(re_search), data))
 
 
 if __name__ == "__main__":
