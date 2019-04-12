@@ -107,8 +107,41 @@ def search_menu():
             print("You must select a valid option. (a, b, c, d, or e)")
 
 
-def search_by_date():
-    pass
+def search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes):
+    timestamp_list = []
+    for date in list_by_date:
+        timestamp_list.append(round(datetime.datetime.timestamp(date)))
+    while True:
+        try:
+            start_date = input("Please enter start date (DD-MM-YYYY): ")
+            strp_start_date = datetime.datetime.strptime(start_date, "%d-%m-%Y")
+        except ValueError:
+            print("You must use the following date format DD-MM-YYYY")
+        else:
+            timestamp_start_date = round(datetime.datetime.timestamp(strp_start_date))
+            while True:
+                try:
+                    end_date = input("Please enter end date (DD-MM-YYYY): ")
+                    strp_end_date = datetime.datetime.strptime(end_date, "%d-%m-%Y")
+                except ValueError:
+                    print("You must use the following date format DD-MM-YYYY")
+                else:
+                    timestamp_end_date = round(datetime.datetime.timestamp(strp_end_date))
+                    break
+            break
+    index_positions_date = [i for (i, date) in enumerate(
+        timestamp_list) if date in range(timestamp_start_date, timestamp_end_date + 1)]
+    for match in index_positions_date:
+        print("""
+                Title: {}
+                Date: {}
+                Time spent in minutes: {}
+                Optional notes: {}
+                """.format(
+            list_by_title[match],
+            list_by_date[match].strftime("%B %d %Y"),
+            list_by_time[match],
+            list_by_notes[match]))
 
 
 def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes):
