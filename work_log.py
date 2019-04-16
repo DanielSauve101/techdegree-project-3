@@ -191,9 +191,19 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
     with open("work_log.csv", "r", newline="") as csvfile:
         data = csvfile.read()
 
-    re_search = input("What type of pattern are you looking for: ")
+    work_log = re.compile(r"""
+    ^(?P<titles>[-\w\d\s]*),  # titles
+    (?P<dates>[-\d]*),  # dates
+    (?P<times>[\d]*),  # times
+    (?P<notes>[-\w\d\s!@#$%^&*]*)?$  # notes
+    """, re.X | re.M)
 
-    print(re.search(r(re_search), data))
+    for match in work_log.finditer(data):
+        print("{titles} : {notes}".format(**match.groupdict()))
+
+    # pattern_search = input(r"What type of pattern are you looking for: ")
+    #
+    # print(re.findall(pattern_search, data, re.X | re.M))
 
 
 if __name__ == "__main__":
