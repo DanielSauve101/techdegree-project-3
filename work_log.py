@@ -83,7 +83,7 @@ def search_menu():
     Please select from the options below?
     a) Search by date
     b) Search by time spent
-    c) Search by exact title
+    c) Search by word
     d) Search by regex
     e) Previous menu
     """
@@ -97,7 +97,7 @@ def search_menu():
             elif search_selection == "b":
                 search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "c":
-                search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes)
+                search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "d":
                 search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "e":
@@ -153,7 +153,7 @@ def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_note
     else:
         index_positions_time = [i for (i, time) in enumerate(list_by_time) if time == search_time]
         if len(index_positions_time) == 0:
-            print("We are sorry but we did not find an exact match in Time")
+            print("We are sorry but we did not find an exact match in time")
         else:
             for match in index_positions_time:
                 print("""
@@ -168,13 +168,16 @@ def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_note
                     list_by_notes[match]))
 
 
-def search_by_exact_title(list_by_title, list_by_date, list_by_time, list_by_notes):
-    search_title = input("Which title are you looking for: ")
-    index_positions_title = [i for (i, title) in enumerate(list_by_title) if title == search_title]
-    if len(index_positions_title) == 0:
-        print("We are sorry but we did not find an exact match in Titles")
+def search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes):
+    search_word = input("Which word are you looking for: ")
+    index_positions_notes = [i for (i, note) in enumerate(list_by_notes) if search_word in note]
+    index_positions_titles = [i for (i, title) in enumerate(list_by_title) if title == search_word]
+    index_positions_combined = list(set(index_positions_notes + index_positions_titles))
+
+    if len(index_positions_combined) == 0:
+        print("We are sorry but we did not find a match for {}".format(search_word))
     else:
-        for match in index_positions_title:
+        for match in index_positions_combined:
             print("""
             Title: {}
             Date: {}
@@ -191,19 +194,35 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
     with open("work_log.csv", "r", newline="") as csvfile:
         data = csvfile.read()
 
+    pattern_search = input(r"What type of pattern are you looking for: ")
+
     work_log = re.compile(r"""
-    ^(?P<titles>[-\w\d\s]*),  # titles
+    ^(?P<titles>""" + pattern_search + """),  # titles
     (?P<dates>[-\d]*),  # dates
     (?P<times>[\d]*),  # times
-    (?P<notes>[-\w\d\s!@#$%^&*]*)?$  # notes
+    (?P<notes>""" + pattern_search + """)?$  # notes
     """, re.X | re.M)
+    #
+    # work_log = re.compile(r"""
+    # ^(?P<titles>[-\w\d\s]*),  # titles
+    # (?P<dates>[-\d]*),  # dates
+    # (?P<times>[\d]*),  # times
+    # (?P<notes>[-\w\d\s!@#$%^&*]*)?$  # notes
+    # """, re.X | re.M)
 
     for match in work_log.finditer(data):
         print("{titles} : {notes}".format(**match.groupdict()))
 
     # pattern_search = input(r"What type of pattern are you looking for: ")
     #
-    # print(re.findall(pattern_search, data, re.X | re.M))
+    # my_list = re.findall(pattern_search, data, re.X)
+    # print(my_list)
+    # index_list = []
+    # for match in my_list:
+    #     for word in list_by_title:
+    #         if word == match:
+    #             index_list.append(list_by_title.index(word))
+    # print(set(index_list))
 
 
 if __name__ == "__main__":
