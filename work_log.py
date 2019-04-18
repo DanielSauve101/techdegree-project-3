@@ -1,3 +1,4 @@
+import os
 import datetime
 import csv
 import re
@@ -20,6 +21,7 @@ def create_work_log():
         menu_selection = main_menu()
         if menu_selection == "a":
             new_entry()
+            print("Your entry has been recorded.")
         # The code below clears all the list to not have duplicates when appending
         elif menu_selection == "b":
             list_by_title.clear()
@@ -43,7 +45,7 @@ def create_work_log():
 
             while True:
                 if len(list_by_title) == 0:
-                    print("We are sorry but there are no entrie to search.")
+                    print("We are sorry but there are no entries to search.")
                     break
                 else:
                     search_selection = search_menu()
@@ -146,8 +148,6 @@ def new_entry():
     optional_notes = input("Optional notes. (You may leave this blank): ")
 
     write_to_csv_file(title, fmt_task_date, time_spent, optional_notes)
-
-    print("Your entry has been recorded.")
 
 
 def write_to_csv_file(title, fmt_task_date, time_spent, optional_notes):
