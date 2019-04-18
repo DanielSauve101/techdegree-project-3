@@ -81,11 +81,12 @@ def search_menu():
     search_menu = """
     Search Menu
     Please select from the options below?
-    a) Search by date
-    b) Search by time spent
-    c) Search by word
-    d) Search by regex
-    e) Previous menu
+    a) Search by range of dates
+    b) Search by specific date
+    c) Search by time spent
+    d) Search by word
+    e) Search by regex
+    f) Previous menu
     """
 
     while True:
@@ -93,14 +94,16 @@ def search_menu():
             print(search_menu)
             search_selection = input("> ").lower()
             if search_selection == "a":
-                search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes)
+                search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "b":
-                search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes)
+                search_specific_date(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "c":
-                search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes)
+                search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "d":
-                search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
+                search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes)
             elif search_selection == "e":
+                search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
+            elif search_selection == "f":
                 break
             elif search_selection != "a" or search_selection != "b" or search_selection != "c" or search_selection != "d" or search_selection != "e":
                 raise ValueError
@@ -108,7 +111,38 @@ def search_menu():
             print("You must select a valid option. (a, b, c, d, or e)")
 
 
-def search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes):
+def search_specific_date(list_by_title, list_by_date, list_by_time, list_by_notes):
+    timestamp_list = []
+    for date in list_by_date:
+        timestamp_list.append(round(datetime.datetime.timestamp(date)))
+    while True:
+        try:
+            search_date = input("Please enter your date (DD-MM-YYYY): ")
+            strp_search_date = datetime.datetime.strptime(search_date, "%d-%m-%Y")
+        except ValueError:
+            print("You must use the following date format DD-MM-YYYY")
+        else:
+            timestamp_search_date = round(datetime.datetime.timestamp(strp_search_date))
+            break
+    index_positions_date = [i for (i, date) in enumerate(
+        timestamp_list) if date == timestamp_search_date]
+    if len(index_positions_date) == 0:
+        print("Unfortunately there are no entries that match {}".format(search_date))
+    else:
+        for match in index_positions_date:
+            print("""
+                    Title: {}
+                    Date: {}
+                    Time spent in minutes: {}
+                    Optional notes: {}
+                    """.format(
+                list_by_title[match],
+                list_by_date[match].strftime("%B %d %Y"),
+                list_by_time[match],
+                list_by_notes[match]))
+
+
+def search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_notes):
     timestamp_list = []
     for date in list_by_date:
         timestamp_list.append(round(datetime.datetime.timestamp(date)))
@@ -132,17 +166,20 @@ def search_by_date(list_by_title, list_by_date, list_by_time, list_by_notes):
             break
     index_positions_date = [i for (i, date) in enumerate(
         timestamp_list) if date in range(timestamp_start_date, timestamp_end_date + 1)]
-    for match in index_positions_date:
-        print("""
-                Title: {}
-                Date: {}
-                Time spent in minutes: {}
-                Optional notes: {}
-                """.format(
-            list_by_title[match],
-            list_by_date[match].strftime("%B %d %Y"),
-            list_by_time[match],
-            list_by_notes[match]))
+    if len(index_positions_date) == 0:
+        print("Unfortunately there are no entries that match {} to {}".format(start_date, end_date))
+    else:
+        for match in index_positions_date:
+            print("""
+                    Title: {}
+                    Date: {}
+                    Time spent in minutes: {}
+                    Optional notes: {}
+                    """.format(
+                list_by_title[match],
+                list_by_date[match].strftime("%B %d %Y"),
+                list_by_time[match],
+                list_by_notes[match]))
 
 
 def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes):
@@ -196,33 +233,25 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
 
     pattern_search = input(r"What type of pattern are you looking for: ")
 
-    work_log = re.compile(r"""
-    ^(?P<titles>""" + pattern_search + """),  # titles
-    (?P<dates>[-\d]*),  # dates
-    (?P<times>[\d]*),  # times
-    (?P<notes>""" + pattern_search + """)?$  # notes
-    """, re.X | re.M)
-    #
-    # work_log = re.compile(r"""
-    # ^(?P<titles>[-\w\d\s]*),  # titles
-    # (?P<dates>[-\d]*),  # dates
-    # (?P<times>[\d]*),  # times
-    # (?P<notes>[-\w\d\s!@#$%^&*]*)?$  # notes
-    # """, re.X | re.M)
+    my_list = re.findall(pattern_search, data, re.X)
+    title_index_list = [i for (i, word) in enumerate(list_by_title) if word in my_list]
+    notes_index_list = [i for (i, word) in enumerate(list_by_notes) if word in my_list]
+    index_positions_combined = list(set(title_index_list + notes_index_list))
 
-    for match in work_log.finditer(data):
-        print("{titles} : {notes}".format(**match.groupdict()))
-
-    # pattern_search = input(r"What type of pattern are you looking for: ")
-    #
-    # my_list = re.findall(pattern_search, data, re.X)
-    # print(my_list)
-    # index_list = []
-    # for match in my_list:
-    #     for word in list_by_title:
-    #         if word == match:
-    #             index_list.append(list_by_title.index(word))
-    # print(set(index_list))
+    if len(index_positions_combined) == 0:
+        print("We are sorry but we did not find a match for {}".format(pattern_search))
+    else:
+        for match in index_positions_combined:
+            print("""
+            Title: {}
+            Date: {}
+            Time spent in minutes: {}
+            Optional notes: {}
+            """.format(
+                list_by_title[match],
+                list_by_date[match].strftime("%B %d %Y"),
+                list_by_time[match],
+                list_by_notes[match]))
 
 
 if __name__ == "__main__":
