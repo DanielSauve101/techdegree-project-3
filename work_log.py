@@ -3,6 +3,86 @@ import csv
 import re
 
 
+def create_work_log():
+    # with open("work_log.csv", "w", newline="") as csvfile:
+    #     fieldnames = ["Title", "Task Date", "Time", "Notes"]
+    #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #
+    #     writer.writeheader()
+    list_by_title = []
+    list_by_date = []
+    list_by_time = []
+    list_by_notes = []
+    timestamp_list = []
+    while True:
+        menu_selection = main_menu()
+        if menu_selection == "a":
+            new_entry()
+
+        elif menu_selection == "b":
+            list_by_title.clear()
+            list_by_date.clear()
+            list_by_time.clear()
+            list_by_notes.clear()
+            timestamp_list.clear()
+
+            with open("work_log.csv", newline="") as csvfile:
+                reader = csv.DictReader(csvfile)
+                rows = list(reader)
+                for word in rows:
+                    list_by_title.append(word["Title"])
+                    list_by_date.append(datetime.datetime.strptime(word["Task Date"], "%d-%m-%Y"))
+                    list_by_time.append(int(word["Time"]))
+                    list_by_notes.append(word["Notes"])
+
+            for date in list_by_date:
+                timestamp_list.append(round(datetime.datetime.timestamp(date)))
+
+            while True:
+                if len(list_by_title) == 0:
+                    print("We are sorry but there are no entrie to search.")
+                    break
+                else:
+                    search_selection = search_menu()
+
+                    if search_selection == "a":
+                        index_list = search_range_of_dates(list_by_title, list_by_date,
+                                                           list_by_time, list_by_notes,
+                                                           timestamp_list)
+                        if index_list:
+                            show_results(list_by_title, list_by_date,
+                                         list_by_time, list_by_notes, index_list)
+                    elif search_selection == "b":
+                        index_list = search_specific_date(list_by_title, list_by_date,
+                                                          list_by_time, list_by_notes,
+                                                          timestamp_list)
+                        if index_list:
+                            show_results(list_by_title, list_by_date,
+                                         list_by_time, list_by_notes, index_list)
+                    elif search_selection == "c":
+                        index_list = search_by_time_spent(list_by_title, list_by_date,
+                                                          list_by_time, list_by_notes)
+                        if index_list:
+                            show_results(list_by_title, list_by_date,
+                                         list_by_time, list_by_notes, index_list)
+                    elif search_selection == "d":
+                        index_list = search_by_word(list_by_title, list_by_date,
+                                                    list_by_time, list_by_notes)
+                        if index_list:
+                            show_results(list_by_title, list_by_date,
+                                         list_by_time, list_by_notes, index_list)
+                    elif search_selection == "e":
+                        index_list = search_by_regex(list_by_title, list_by_date,
+                                                     list_by_time, list_by_notes)
+                        if index_list:
+                            show_results(list_by_title, list_by_date,
+                                         list_by_time, list_by_notes, index_list)
+                    elif search_selection == "f":
+                        break
+        elif menu_selection == "c":
+            break
+
+
 def main_menu():
     menu_options = """
     Work Log Main Menu
@@ -16,13 +96,13 @@ def main_menu():
         try:
             print(menu_options)
             menu_selection = input("> ").lower()
-            if menu_selection == "a":
-                new_entry()
-            elif menu_selection == "b":
-                search_menu()
-            elif menu_selection == "c":
-                break
-            elif menu_selection != "a" or menu_selection != "b" or menu_selection != "c":
+            if (menu_selection == "a" or
+                    menu_selection == "b" or
+                    menu_selection == "c"):
+                return menu_selection
+            elif (menu_selection != "a" or
+                    menu_selection != "b" or
+                    menu_selection != "c"):
                 raise ValueError
         except ValueError:
             print("You must select a valid option. (a, b, or c)")
@@ -47,11 +127,12 @@ def new_entry():
                     break
             break
     optional_notes = input("Optional notes. (You may leave this blank): ")
-    write_to_file(title, fmt_task_date, time_spent, optional_notes)
+    write_to_csv_file(title, fmt_task_date, time_spent, optional_notes)
+
     print("Your entry has been recorded.")
 
 
-def write_to_file(title, fmt_task_date, time_spent, optional_notes):
+def write_to_csv_file(title, fmt_task_date, time_spent, optional_notes):
     with open("work_log.csv", "a", newline="") as csvfile:
         fieldnames = ["Title", "Task Date", "Time", "Notes"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -65,19 +146,6 @@ def write_to_file(title, fmt_task_date, time_spent, optional_notes):
 
 
 def search_menu():
-    list_by_title = []
-    list_by_date = []
-    list_by_time = []
-    list_by_notes = []
-    with open("work_log.csv", newline="") as csvfile:
-        reader = csv.DictReader(csvfile)
-        rows = list(reader)
-        for word in rows:
-            list_by_title.append(word["Title"])
-            list_by_date.append(datetime.datetime.strptime(word["Task Date"], "%d-%m-%Y"))
-            list_by_time.append(int(word["Time"]))
-            list_by_notes.append(word["Notes"])
-
     search_menu = """
     Search Menu
     Please select from the options below?
@@ -93,59 +161,25 @@ def search_menu():
         try:
             print(search_menu)
             search_selection = input("> ").lower()
-            if search_selection == "a":
-                search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_notes)
-            elif search_selection == "b":
-                search_specific_date(list_by_title, list_by_date, list_by_time, list_by_notes)
-            elif search_selection == "c":
-                search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes)
-            elif search_selection == "d":
-                search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes)
-            elif search_selection == "e":
-                search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes)
-            elif search_selection == "f":
-                break
-            elif search_selection != "a" or search_selection != "b" or search_selection != "c" or search_selection != "d" or search_selection != "e":
+            if (search_selection == "a" or
+                    search_selection == "b" or
+                    search_selection == "c" or
+                    search_selection == "d" or
+                    search_selection == "e" or
+                    search_selection == "f"):
+                return search_selection
+            elif (search_selection != "a" or
+                    search_selection != "b" or
+                    search_selection != "c" or
+                    search_selection != "d" or
+                    search_selection != "e" or
+                    search_selection != "f"):
                 raise ValueError
         except ValueError:
-            print("You must select a valid option. (a, b, c, d, or e)")
+            print("You must select a valid option. (a, b, c, d, e, f)")
 
 
-def search_specific_date(list_by_title, list_by_date, list_by_time, list_by_notes):
-    timestamp_list = []
-    for date in list_by_date:
-        timestamp_list.append(round(datetime.datetime.timestamp(date)))
-    while True:
-        try:
-            search_date = input("Please enter your date (DD-MM-YYYY): ")
-            strp_search_date = datetime.datetime.strptime(search_date, "%d-%m-%Y")
-        except ValueError:
-            print("You must use the following date format DD-MM-YYYY")
-        else:
-            timestamp_search_date = round(datetime.datetime.timestamp(strp_search_date))
-            break
-    index_positions_date = [i for (i, date) in enumerate(
-        timestamp_list) if date == timestamp_search_date]
-    if len(index_positions_date) == 0:
-        print("Unfortunately there are no entries that match {}".format(search_date))
-    else:
-        for match in index_positions_date:
-            print("""
-                    Title: {}
-                    Date: {}
-                    Time spent in minutes: {}
-                    Optional notes: {}
-                    """.format(
-                list_by_title[match],
-                list_by_date[match].strftime("%B %d %Y"),
-                list_by_time[match],
-                list_by_notes[match]))
-
-
-def search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_notes):
-    timestamp_list = []
-    for date in list_by_date:
-        timestamp_list.append(round(datetime.datetime.timestamp(date)))
+def search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_notes, timestamp_list):
     while True:
         try:
             start_date = input("Please enter start date (DD-MM-YYYY): ")
@@ -164,22 +198,34 @@ def search_range_of_dates(list_by_title, list_by_date, list_by_time, list_by_not
                     timestamp_end_date = round(datetime.datetime.timestamp(strp_end_date))
                     break
             break
+
     index_positions_date = [i for (i, date) in enumerate(
         timestamp_list) if date in range(timestamp_start_date, timestamp_end_date + 1)]
+
     if len(index_positions_date) == 0:
         print("Unfortunately there are no entries that match {} to {}".format(start_date, end_date))
     else:
-        for match in index_positions_date:
-            print("""
-                    Title: {}
-                    Date: {}
-                    Time spent in minutes: {}
-                    Optional notes: {}
-                    """.format(
-                list_by_title[match],
-                list_by_date[match].strftime("%B %d %Y"),
-                list_by_time[match],
-                list_by_notes[match]))
+        return index_positions_date
+
+
+def search_specific_date(list_by_title, list_by_date, list_by_time, list_by_notes, timestamp_list):
+    while True:
+        try:
+            search_date = input("Please enter your date (DD-MM-YYYY): ")
+            strp_search_date = datetime.datetime.strptime(search_date, "%d-%m-%Y")
+        except ValueError:
+            print("You must use the following date format DD-MM-YYYY")
+        else:
+            timestamp_search_date = round(datetime.datetime.timestamp(strp_search_date))
+            break
+
+    index_positions_date = [i for (i, date) in enumerate(
+        timestamp_list) if date == timestamp_search_date]
+
+    if len(index_positions_date) == 0:
+        print("Unfortunately there are no entries that match {}".format(search_date))
+    else:
+        return index_positions_date
 
 
 def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_notes):
@@ -192,21 +238,12 @@ def search_by_time_spent(list_by_title, list_by_date, list_by_time, list_by_note
         if len(index_positions_time) == 0:
             print("We are sorry but we did not find an exact match in time")
         else:
-            for match in index_positions_time:
-                print("""
-                Title: {}
-                Date: {}
-                Time spent in minutes: {}
-                Optional notes: {}
-                """.format(
-                    list_by_title[match],
-                    list_by_date[match].strftime("%B %d %Y"),
-                    list_by_time[match],
-                    list_by_notes[match]))
+            return index_positions_time
 
 
 def search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes):
     search_word = input("Which word are you looking for: ")
+
     index_positions_notes = [i for (i, note) in enumerate(list_by_notes) if search_word in note]
     index_positions_titles = [i for (i, title) in enumerate(list_by_title) if title == search_word]
     index_positions_combined = list(set(index_positions_notes + index_positions_titles))
@@ -214,17 +251,7 @@ def search_by_word(list_by_title, list_by_date, list_by_time, list_by_notes):
     if len(index_positions_combined) == 0:
         print("We are sorry but we did not find a match for {}".format(search_word))
     else:
-        for match in index_positions_combined:
-            print("""
-            Title: {}
-            Date: {}
-            Time spent in minutes: {}
-            Optional notes: {}
-            """.format(
-                list_by_title[match],
-                list_by_date[match].strftime("%B %d %Y"),
-                list_by_time[match],
-                list_by_notes[match]))
+        return index_positions_combined
 
 
 def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
@@ -241,23 +268,22 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
     if len(index_positions_combined) == 0:
         print("We are sorry but we did not find a match for {}".format(pattern_search))
     else:
-        for match in index_positions_combined:
-            print("""
-            Title: {}
-            Date: {}
-            Time spent in minutes: {}
-            Optional notes: {}
-            """.format(
-                list_by_title[match],
-                list_by_date[match].strftime("%B %d %Y"),
-                list_by_time[match],
-                list_by_notes[match]))
+        return index_positions_combined
+
+
+def show_results(list_by_title, list_by_date, list_by_time, list_by_notes, index_list):
+    for match in index_list:
+        print("""
+                Title: {}
+                Date: {}
+                Time spent in minutes: {}
+                Optional notes: {}
+                """.format(
+            list_by_title[match],
+            list_by_date[match].strftime("%B %d %Y"),
+            list_by_time[match],
+            list_by_notes[match]))
 
 
 if __name__ == "__main__":
-    # with open("work_log.csv", "w", newline="") as csvfile:
-    #     fieldnames = ["Title", "Task Date", "Time", "Notes"]
-    #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    #
-    #     writer.writeheader()
-    main_menu()
+    create_work_log()
