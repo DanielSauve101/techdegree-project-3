@@ -21,8 +21,8 @@ def create_work_log():
         if menu_selection == "a":
             new_entry()
             print("Your entry has been recorded.")
-        # The code below clears all the list to not have duplicates when appending
         elif menu_selection == "b":
+            # The code below clears all the list to not have duplicates when appending
             list_by_title.clear()
             list_by_date.clear()
             list_by_time.clear()
