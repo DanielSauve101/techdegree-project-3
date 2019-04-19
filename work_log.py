@@ -1,6 +1,5 @@
-import os
-import datetime
 import csv
+import datetime
 import re
 
 
