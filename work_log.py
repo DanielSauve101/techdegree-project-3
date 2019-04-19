@@ -10,11 +10,6 @@ def create_work_log():
     list_by_time = []
     list_by_notes = []
     timestamp_list = []
-    # The code below creates the csv file and adds the header
-    with open("work_log.csv", "w", newline="") as csvfile:
-        fieldnames = ["Title", "Task Date", "Time", "Notes"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
 
     while True:
         menu_selection = main_menu()
@@ -150,7 +145,6 @@ def new_entry():
 
 
 def write_to_csv_file(title, fmt_task_date, time_spent, optional_notes):
-    # This function writes to the csv file
     with open("work_log.csv", "a", newline="") as csvfile:
         fieldnames = ["Title", "Task Date", "Time", "Notes"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -311,6 +305,7 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
     if len(index_positions_combined) == 0:
         print("We are sorry but we did not find a match for {}".format(
             pattern_search))
+        print("You can try using a similar format to [\w]+ ")
     else:
         return index_positions_combined
 
