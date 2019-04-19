@@ -231,8 +231,14 @@ def search_range_of_dates(list_by_title, list_by_date, list_by_time,
 def search_specific_date(list_by_title, list_by_date, list_by_time,
                          list_by_notes, timestamp_list):
     # This function searches from a specific date and returns the index positions
+    strf_list_of_dates = []
+
+    for date in list_by_date:
+        strf_list_of_dates.append(date.strftime("%d-%m-%Y"))
+
     while True:
         try:
+            print("Here is a list of dates available {} ".format(strf_list_of_dates))
             search_date = input("Please enter your date (DD-MM-YYYY): ")
             strp_search_date = datetime.datetime.strptime(
                 search_date, "%d-%m-%Y")
