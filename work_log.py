@@ -299,21 +299,24 @@ def search_by_regex(list_by_title, list_by_date, list_by_time, list_by_notes):
     with open("work_log.csv", "r", newline="") as csvfile:
         data = csvfile.read()
 
-    pattern_search = input(r"What type of pattern are you looking for: ")
-
-    my_list = re.findall(pattern_search, data, re.X)
-    title_index_list = [i for (i, word) in enumerate(list_by_title)
-                        if word in my_list]
-    notes_index_list = [i for (i, word) in enumerate(list_by_notes)
-                        if word in my_list]
-    index_positions_combined = list(set(title_index_list + notes_index_list))
-
-    if len(index_positions_combined) == 0:
-        print("We are sorry but we did not find a match for {}".format(
-            pattern_search))
-        print("You can try using a similar format to [\w]+ ")
+    try:
+        pattern_search = re.compile(input(r"What type of pattern are you looking for: "), re.X)
+    except re.error:
+        print("Unfortunately that is not a valid regex.")
     else:
-        return index_positions_combined
+        my_list = pattern_search.findall(data)
+        title_index_list = [i for (i, word) in enumerate(list_by_title)
+                            if word in my_list]
+        notes_index_list = [i for (i, word) in enumerate(list_by_notes)
+                            if word in my_list]
+        index_positions_combined = list(set(title_index_list + notes_index_list))
+
+        if len(index_positions_combined) == 0:
+            print("We are sorry but we did not find a match for {}".format(
+                pattern_search))
+            print("You can try using a similar format to [\w]+ ")
+        else:
+            return index_positions_combined
 
 
 def show_results(list_by_title, list_by_date, list_by_time, list_by_notes,
